@@ -4,23 +4,19 @@ from cv_bridge import CvBridge, CvBridgeError
 import cv2
 import numpy as np
 
-class Feed:
+class Publisher:
     def __init__(self, cameraport, topic='image_topic', publishrate=0):
         self.publishrate = publishrate
-        self.camera = cameraport
-        rospy.init_node('image_publisher_node', anonymous=True)
-        self.publisher = rospy.Publisher(topic, Image, queue_size=10)
-        self.bridge = CvBridge()
-        self.counter = 0
-        self.cam_feed = cv2.VideoCapture(self.camera)
+        rospy.init_node('image_publisher_node', anonymous=True) # init rosnode
+        self.publisher = rospy.Publisher(topic, Image, queue_size=10) # init topic to publish to
+        self.bridge = CvBridge() # convert opencv image to ros image msg
+        self.cam_feed = cv2.VideoCapture(cameraport) # init device we capture from
 
-    def publish_image(self, topic='image_topic'):
+    def publish_image(self):
         
-        
+        # Read image from camera
         ret, img = self.cam_feed.read()
         # Initialize the OpenCV bridge for converting between OpenCV images and ROS messages
-        self.counter = self.counter + 1
-        print(self.counter,':\n',img)
         
         # Convert the OpenCV image to a ROS message
         try:
@@ -31,17 +27,17 @@ class Feed:
         
         # Publish the ROS image message
         self.publisher.publish(image_msg)
-        # cv2.imshow("publisher",img)
-        
-        if (self.publishrate == 0):
+        # cv2.imshow("publisher",img) - testing, making sure the image is being recieved by the camera
+        # Rerun the publish image method
+        if (self.publishrate == 0): # publish images as fast as possible
             rospy.spin()
         else:
-            rospy.sleep(0.1)
+            rospy.sleep(self.publishrate)
     
 def main():
-    image = Feed(0,publishrate=0.5)
+    image = Publisher(0,publishrate=0.1) # create Feed object
     while True:
-        if image.publish_image() == -1: break
+        if image.publish_image() == -1: break # read and publish the image
         if (cv2.waitKey(1) & 0xFF == ord("q")) or (cv2.waitKey(1)==27):
             break
         
