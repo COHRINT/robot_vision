@@ -1,3 +1,4 @@
-# robot_vision
+# robot_vision_base
 
-This repo contains the ROS implementation of YOLOv3. The output of the algorithm is a bounding box around the detected object. 
+This repository contains the classes for an image publisher and an image subscriber.
+For system requirements to use this node, please see `requirements.txt`.
